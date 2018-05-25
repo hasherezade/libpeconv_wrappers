@@ -35,8 +35,6 @@ public:
 		return true;
 	}
 
-	bool embedSnippet(FARPROC newFunc, DWORD rva_from, DWORD rva_to);
-
 	ULONGLONG getImgBase()
 	{
 		return (ULONGLONG) malware;
