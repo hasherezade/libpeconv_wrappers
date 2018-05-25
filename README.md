@@ -6,5 +6,5 @@ Clone:
 -
 Use recursive clone to get the repo together with all the submodules:
 <pre>
-git clone --recursive https://github.com/hasherezade/libpeconv_project_template.git
+git clone --recursive https://github.com/hasherezade/libpeconv_wrappers.git
 </pre>
