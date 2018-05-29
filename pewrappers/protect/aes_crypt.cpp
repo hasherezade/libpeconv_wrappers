@@ -28,7 +28,9 @@ namespace protect {
 			size_t rem_size = inputSize - (i * chunk_size);
 			if (rem_size < chunk_size) {
 				chunk_size = rem_size;
+#ifdef _DEBUG
 				std::cout << "Last chunk: " << chunk_size << std::endl;
+#endif
 				isFinal = TRUE;
 			}
 			memcpy(chunk, next_ptr, chunk_size);
@@ -36,17 +38,23 @@ namespace protect {
 			
 			if (!isDecrypt) {
 				if (!CryptEncrypt(hKey, NULL, isFinal, 0, chunk, &out_len, protect::CHUNK_SIZE)) {
+#ifdef _DEBUG
 					std::cout << "[-] CryptEncrypt failed: " << std::hex << GetLastError() << std::endl;
+#endif
 					return FALSE;
 				}
 			} else {
 				if (!CryptDecrypt(hKey, NULL, isFinal, 0, chunk, &out_len)) {
+#ifdef _DEBUG
 					std::cout << "[-] CryptDecrypt failed: " << std::hex << GetLastError() << std::endl;
+#endif
 					return FALSE;
 				}
 			}
 			if ((processed_bytes + out_len) > outBufSize) {
+#ifdef _DEBUG
 				std::cerr << "Output buffer finished!" << std::endl;
+#endif
 				break;
 			}
 			memcpy(outptr, chunk, out_len);
@@ -84,8 +92,7 @@ BOOL protect::aes_crypt(BYTE *inbuf, DWORD inputSize, BYTE *outbuf, size_t outBu
 	}
 	
 	if (!CryptHashData(hHash, (BYTE*)key_str, key_len, 0)) {
-		DWORD err = GetLastError();
-		//DBGP(("CryptHashData Failed : %#x\n", err));
+		dwStatus = GetLastError();
 		return dwStatus;
 	}
 
@@ -104,4 +111,3 @@ BOOL protect::aes_crypt(BYTE *inbuf, DWORD inputSize, BYTE *outbuf, size_t outBu
 	CryptDestroyHash(hHash);
 	return dwStatus;
 }
-

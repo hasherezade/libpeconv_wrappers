@@ -6,8 +6,6 @@
 #include "pe_wrapper.h"
 #include "peconv.h"
 
-//#include "protect\protect.h"
-
 class ProtectedWrapper : public PeWrapper
 {
 public:
@@ -19,7 +17,6 @@ public:
 			return;
 		}
 		ready = initBot(func_resolver);
-		//eraseKey();
 	}
 	
 	void eraseKey()
@@ -33,7 +30,6 @@ public:
 protected:
 	virtual bool initBot(peconv::hooking_func_resolver *func_resolver)
 	{
-		//std::cout << "Init protected" << std::endl;
 		if (!loadRes(func_resolver)) {
 			return false;
 		}

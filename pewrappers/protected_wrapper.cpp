@@ -9,12 +9,11 @@ BYTE* ProtectedWrapper::load_protected(BYTE *enc_buf, size_t enc_size, size_t &o
 		return nullptr;
 	}
 	size_t processed_len = 0;
-	if (!protect::aes_crypt(enc_buf, enc_size, compressed_buf, enc_size, &processed_len, (const char*)key, keySize, true)) {
+	if (!protect::aes_crypt(enc_buf, enc_size, compressed_buf, enc_size, &processed_len, (const char*) key, keySize, true)) {
 		peconv::free_aligned(compressed_buf);
 		return nullptr;
 	}
 
-	//std::cout << "Decrypted OK! Size:" << processed_len << std::endl;
 	size_t decoded_size = processed_len * 2;
 	BYTE *decoded_buf = peconv::alloc_aligned(decoded_size, PAGE_READWRITE);
 	if (!decoded_buf) {

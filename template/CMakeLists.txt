@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-project (demos)
+project (template)
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 
@@ -16,13 +16,11 @@ set (srcs
 set (hdrs
 )
 
-#set (rsrc
+set (rsrc
 #    resource.rc
-#)
+)
 
 add_executable ( ${PROJECT_NAME} ${hdrs} ${srcs} ${rsrc} )
 target_link_libraries ( ${PROJECT_NAME} ${WRAPPERS_LIB} )
 add_dependencies( ${PROJECT_NAME} libpeconv pewrappers)
 
-#add the application that will be used for tests:
-#add_subdirectory ( test_case1 )

@@ -19,6 +19,6 @@ set ( WRAPPERS_LIB $<TARGET_FILE:pewrappers> CACHE FILE "PEWrappers library path
 
 # Add sub-directories
 #
-add_subdirectory ( demos )
+add_subdirectory ( template )
 add_subdirectory ( pewrappers/protect )
 

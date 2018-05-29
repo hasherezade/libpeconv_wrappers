@@ -58,17 +58,16 @@ protected:
 
 	virtual bool initBot(peconv::hooking_func_resolver *func_resolver)
 	{
-		//std::cout << "Init Normal wrapper" << std::endl;
 		if (!loadRes(func_resolver)) {
 			return false;
 		}
 		is64 = peconv::is64bit(malware);
-		//std::cout << "Loaded at: " << std::hex << (ULONGLONG) malware << std::endl;
 		return true;
 	}
 
 	bool loadRes(peconv::hooking_func_resolver *my_resolver = nullptr);
 	virtual bool load(BYTE *raw_buffer, size_t raw_size, peconv::hooking_func_resolver *my_res = nullptr);
+
 	bool is64;
 	bool ready;
 	DWORD resId;

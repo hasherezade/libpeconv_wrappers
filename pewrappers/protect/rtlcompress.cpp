@@ -11,8 +11,6 @@ typedef NTSTATUS(__stdcall * _RtlDecompressBuffer)(
    PULONG FinalUncompressedSize
 );
 
-//t_RtlDecompressBuffer _RtlDecompressBuffer;
-
 typedef NTSTATUS(__stdcall *_RtlCompressBuffer)(
   _In_  USHORT CompressionFormatAndEngine,
   _In_  PUCHAR UncompressedBuffer,
@@ -23,7 +21,6 @@ typedef NTSTATUS(__stdcall *_RtlCompressBuffer)(
   _Out_ PULONG FinalCompressedSize,
   _In_  PVOID  WorkSpace
 );
-//t_RtlCompressBuffer _RtlCompressBuffer;
 
 typedef NTSTATUS(__stdcall *_RtlGetCompressionWorkSpaceSize)(
    USHORT CompressionFormatAndEngine,
@@ -33,12 +30,17 @@ typedef NTSTATUS(__stdcall *_RtlGetCompressionWorkSpaceSize)(
 
 BOOL protect::compress_buffer(const char *buffer, const ULONG bufferLen, UCHAR *compBuffer, ULONG compBufferLen, ULONG *compBufferSize)
 {
-	HMODULE hNtdll = GetModuleHandleA("ntdll");
-    if (hNtdll == NULL) return FALSE;
+    HMODULE hNtdll = GetModuleHandleA("ntdll");
+    if (hNtdll == NULL) {
+        return FALSE;
+    }
+    _RtlCompressBuffer RtlCompressBuffer = 
+        (_RtlCompressBuffer) GetProcAddress(hNtdll, "RtlCompressBuffer");
 
-   _RtlCompressBuffer RtlCompressBuffer = (_RtlCompressBuffer) GetProcAddress(hNtdll, "RtlCompressBuffer");
-   _RtlGetCompressionWorkSpaceSize RtlGetCompressionWorkSpaceSize = (_RtlGetCompressionWorkSpaceSize) GetProcAddress(hNtdll, "RtlGetCompressionWorkSpaceSize");
-	if (RtlCompressBuffer == NULL || RtlGetCompressionWorkSpaceSize == NULL) return FALSE;
+   _RtlGetCompressionWorkSpaceSize RtlGetCompressionWorkSpaceSize = 
+       (_RtlGetCompressionWorkSpaceSize) GetProcAddress(hNtdll, "RtlGetCompressionWorkSpaceSize");
+
+    if (RtlCompressBuffer == NULL || RtlGetCompressionWorkSpaceSize == NULL) return FALSE;
 
    ULONG bufWorkspaceSize;  // Workspace Size
    ULONG fragWorkspaceSize; // Fragmented Workspace Size (Unused)
@@ -51,10 +53,10 @@ BOOL protect::compress_buffer(const char *buffer, const ULONG bufferLen, UCHAR *
    if (ret != S_OK) {
       return FALSE;
    }
-
+#ifdef _DEBUG
    std::cout << "Compression Workspace Size: 0x" << std::hex << bufWorkspaceSize
              << std::dec << " (" << bufWorkspaceSize << ")" << std::endl;
-
+#endif
    VOID *workspace = (VOID *)LocalAlloc(LMEM_FIXED, bufWorkspaceSize);
    if (workspace == NULL) {
       std::cout << "Failed to allocate space for workspace" << std::endl;
@@ -76,18 +78,21 @@ BOOL protect::compress_buffer(const char *buffer, const ULONG bufferLen, UCHAR *
    if (result != S_OK) {
       return FALSE;
    }
+#ifdef _DEBUG
    std::cout << "Compressed Length: " << compBufferSize << std::endl;
+#endif
    return TRUE;
 }
 
 BOOL protect::decompress_buffer(const char *buffer, const int bufferLen, UCHAR *uncompBuffer, const int uncompBufferLen, ULONG *uncompBufferSize)
 {
-	HMODULE hNtdll = GetModuleHandleA("ntdll");
+    HMODULE hNtdll = GetModuleHandleA("ntdll");
     if (hNtdll == NULL) return FALSE;
 
    _RtlDecompressBuffer RtlDecompressBuffer = (_RtlDecompressBuffer) GetProcAddress(hNtdll, "RtlDecompressBuffer");
-   if (RtlDecompressBuffer == NULL) return FALSE;
-
+   if (RtlDecompressBuffer == NULL) {
+       return FALSE;
+   }
    NTSTATUS result = RtlDecompressBuffer(
                         COMPRESSION_FORMAT_LZNT1 | COMPRESSION_ENGINE_MAXIMUM, // CompressionFormat
                         uncompBuffer,                                          // UncompressedBuffer
@@ -98,13 +103,14 @@ BOOL protect::decompress_buffer(const char *buffer, const int bufferLen, UCHAR *
                      );
 
    if (result != S_OK) {
-		printf("Error: %x\n", result);
-		return FALSE;
+#ifdef _DEBUG
+        printf("Error: %x\n", result);
+#endif
+        return FALSE;
    }
 
-   // std::cout << "Uncompressed DATA: " << uncompBuffer << std::endl;
+#ifdef _DEBUG
    std::cout << "Uncompressed Length: " << uncompBufferSize << std::endl;
+#endif
    return TRUE;
 }
-
-// ----------------------------------------------------------------------------------------------------
