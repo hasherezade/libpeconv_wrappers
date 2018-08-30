@@ -44,7 +44,8 @@ namespace protect {
 					return FALSE;
 				}
 			} else {
-				if (!CryptDecrypt(hKey, NULL, isFinal, 0, chunk, &out_len)) {
+				out_len = protect::CHUNK_SIZE;
+				if (!CryptDecrypt(hKey, NULL, FALSE, 0, chunk, &out_len)) {
 #ifdef _DEBUG
 					std::cout << "[-] CryptDecrypt failed: " << std::hex << GetLastError() << std::endl;
 #endif
