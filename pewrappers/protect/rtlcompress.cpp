@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#define MY_FORMAT (COMPRESSION_FORMAT_LZNT1 | COMPRESSION_ENGINE_MAXIMUM)
+#define UNCOMPRESSED_CHUNK_SIZE 0x200
+
 typedef NTSTATUS(__stdcall * _RtlDecompressBuffer)(
    USHORT CompressionFormat,
    PUCHAR UncompressedBuffer,
@@ -45,10 +48,10 @@ BOOL protect::compress_buffer(const char *buffer, const ULONG bufferLen, UCHAR *
    ULONG bufWorkspaceSize;  // Workspace Size
    ULONG fragWorkspaceSize; // Fragmented Workspace Size (Unused)
    NTSTATUS ret = RtlGetCompressionWorkSpaceSize(
-                     COMPRESSION_FORMAT_LZNT1 | COMPRESSION_ENGINE_MAXIMUM, // CompressionFormatAndEngine
-                     &bufWorkspaceSize,                                     // CompressBufferWorkSpaceSize
-                     &fragWorkspaceSize                                     // CompressFragmentWorkSpaceSize
-                  );
+        MY_FORMAT, // CompressionFormatAndEngine
+        &bufWorkspaceSize,                                     // CompressBufferWorkSpaceSize
+        &fragWorkspaceSize                                     // CompressFragmentWorkSpaceSize
+    );
 
    if (ret != S_OK) {
       return FALSE;
@@ -64,12 +67,12 @@ BOOL protect::compress_buffer(const char *buffer, const ULONG bufferLen, UCHAR *
    }
 
    NTSTATUS result = RtlCompressBuffer(
-                        COMPRESSION_FORMAT_LZNT1 | COMPRESSION_ENGINE_MAXIMUM, // CompressionFormatAndEngine
+       MY_FORMAT, // CompressionFormatAndEngine
                         (UCHAR *)buffer,                                       // UncompressedBuffer
                         bufferLen,                                             // UncompressedBufferSize
                         compBuffer,                                            // CompressedBuffer
                         compBufferLen,                                         // CompressedBufferSize
-                        4096,                                                  // UncompressedChunkSize
+                        UNCOMPRESSED_CHUNK_SIZE,                                                  // UncompressedChunkSize
                         compBufferSize,                                        // FinalCompressedSize
                         workspace                                              // WorkSpace
                      );
@@ -94,7 +97,7 @@ BOOL protect::decompress_buffer(const char *buffer, const int bufferLen, UCHAR *
        return FALSE;
    }
    NTSTATUS result = RtlDecompressBuffer(
-                        COMPRESSION_FORMAT_LZNT1 | COMPRESSION_ENGINE_MAXIMUM, // CompressionFormat
+       MY_FORMAT, // CompressionFormat
                         uncompBuffer,                                          // UncompressedBuffer
                         uncompBufferLen,                                       // UncompressedBufferSize
                         (UCHAR *)buffer,                                       // CompressedBuffer
